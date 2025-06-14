@@ -1,0 +1,44 @@
+name: Roll JWKS Key
+
+on:
+  schedule:
+    - cron: '0 */48 * * *'
+  workflow_dispatch:
+
+jobs:
+  roll-key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up jq and jose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          sudo apt-get install -y jose
+
+      - name: Generate or roll keys
+        run: |
+          if [ ! -f jwks_public.json ]; then
+            echo "JWKS files not found, running generate_jwks.sh"
+            bash scripts/generate_jwks.sh
+          else
+            echo "JWKS files found, running roll_jwks_key.sh"
+            bash scripts/roll_jwks_key.sh
+          fi
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push changes
+        run: |
+          git add jwks_public.json
+          git commit -m "Automated JWKS key generation/rollover" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

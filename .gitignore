@@ -1,0 +1,3 @@
+# Ignore private key files and working key files
+jwks_private.json
+scripts/tmp/
