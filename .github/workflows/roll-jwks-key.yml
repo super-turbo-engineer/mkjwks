@@ -1,8 +1,8 @@
 name: Roll JWKS Key
 
 on:
-  schedule:
-    - cron: '0 */48 * * *'
+#  schedule:
+#    - cron: '0 */48 * * *'
   workflow_dispatch:
 
 jobs:
